@@ -1,1 +1,233 @@
-
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<style type="text/css">
+.sampleIdent {
+	background: yellow;
+	padding: 30px;
+}
+</style>
+<div id="application">
+	{{ message }}
+	<br>
+	<b>{{ bold }}</b>
+	<br>
+	<span v-bind:title="message">
+		Hover your mouse over me for a few seconds
+	</span>
+	<br>
+	<a v-bind:href="website">
+		goto my web
+	</a>
+	<br>
+	<div v-bind:class="ident">
+		sample text in a yellow box
+	</div>
+	<span v-if="seen">Now you see this text<br></span>
+	<span v-if="notSeen">Now you not see this text<br></span>
+	<span v-if="!seen">Now you not see this text<br></span>
+	<ol>
+		<li v-for="item in items">
+			<b>{{ item.title }}</b>
+			{{ item.text }}
+		</li>
+	</ol>
+	<p>
+		{{ sampleText }}
+	</p>
+	<button v-on:click="resetText">Reset Message</button>
+	<button v-on:click="upperText">Uppercase Message</button>
+	<button v-on:click="lowerText">Lowercase Message</button>
+	<button v-on:click="reverseText">Reverse Message</button>
+	<br>
+	<input type="text" v-model="name">
+	<br>
+	<label v-once>Hello {{name}} (Fix text)</label>
+	<br>
+	<label>Hello {{name}}</label>
+	<br>
+	<language-item v-for="item in languages" v-bind:item="item" v-bind:key="item.id"></language-item>
+	<br>
+	<span v-html="rawHtml"></span>
+	<br>
+	<button v-bind:disabled="isButtonDisabled">Button</button>
+	<button v-bind:disabled="!isButtonDisabled">Button</button>
+	<br>
+	<pre>
+	{{ 5 + 1 }}
+	{{ 6 > 4 }}
+	{{ 6 < 4 }}
+	{{ seen ? 'YES' : 'NO' }}
+	{{ isButtonDisabled ? 'isButtonDisabled' : 'is not ButtonDisabled' }}
+	{{ message.split('').reverse().join('') }}
+	{{ name.split('').reverse().join('') }}
+	{{ name }}
+	sin(0): {{ Math.sin(0)}}
+	</pre>
+	<br>
+	<span v-html="'<b>'+name+'</b>'"></span>
+	<br>
+	<p>{{ ReverseText }}</p>
+	<h4>Current time: {{ nowDate }}</h4>
+	<br>
+	First name: <input v-model="firstName">
+	<br>
+	Last name: <input v-model="lastName">
+	<br>
+	<label>Fullname: {{fullName}}</label>
+	<br>
+	<div v-bind:style="{color: 'green'}">Hi with inject css style!</div>
+	<br>
+	<h1 v-if="seen">Vue is awesome!</h1>
+	<h1 v-else>Oh no 😢</h1>
+	<br>
+	<h1 v-if="!seen">Vue is awesome!</h1>
+	<h1 v-else>Oh no 😢</h1>
+	<br>
+	<div v-if="Math.random() > 0.5">
+		Now you see me
+	</div>
+	<div v-else>
+		Now you don't
+	</div>
+	<br>
+	<div v-if="type === 'A'">
+		A
+	</div>
+	<div v-else-if="type === 'B'">
+		B
+	</div>
+	<div v-else-if="type === 'C'">
+		C
+	</div>
+	<div v-else>
+		Not A/B/C
+	</div>
+	<br>
+	<h1 v-show="seen">Hello!</h1>
+	<h1 v-show="!seen">Bye!</h1>
+	<br>
+	<input v-model="languageName">
+	<button v-on:click="addLanguage">Insert new language</button>
+	<br>
+	<h3>List of languages</h3>
+	<ul>
+		<li v-for="(item, index) in languages">
+			<b>{{item.id}}({{index}})</b>: {{ item. name }}
+		</li>
+	</ul>
+	<br>
+	<span v-for="n in 10">{{ n }} </span>
+	<br>
+	Enter name of a city or location: <input v-model="query">
+	<!-- <p >{{answer}}</p> -->
+	<p v-html="answer"></p>
+	<br>
+	<span v-for="n in 11">{{ "round(sin("+(n-1)+")) = " + Math.round(Math.sin(n-1)) }} <br></span>
+</div>
+<script>
+Vue.component('language-item', {
+	props: ['item'],
+	template: '<li><font v-bind:color="item.color">{{ item.name }}</font></li>'
+})
+var application = new Vue({
+	el: '#application',
+	computed: {
+		ReverseText: function() {
+			return this.name + ": "+this.sampleText.split('').reverse().join('')
+		},
+		nowDate: function() {
+			return Date.now()
+		}
+	},
+  	methods: {
+  		addLanguage: function() {
+  			// alert(this.languageName)
+  			this.languages.push({id:this.languages[this.languages.length-1].id+1, name: this.languageName})
+  		},
+		resetText: function() {
+			this.sampleText = 'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.'
+		},
+		upperText: function() {
+			this.sampleText = this.sampleText.toUpperCase()
+		},
+		lowerText: function() {
+			this.sampleText = this.sampleText.toLowerCase()
+		},
+		reverseText: function() {
+			this.sampleText = this.sampleText.split('').reverse().join('')
+		},
+		getAnswer: function(query) {
+			if(query.trim() == '') {
+				this.answer = 'Bad query, please enter name of a city!'
+				return
+			}
+			this.answer = 'Thinking...'
+			var vm = this
+			axios.get('http://api.weatherstack.com/current?access_key=c5489169cd129987503a7c7281a3088c&query='+query)
+			.then(function(response) {
+				console.log(response.data)
+				// vm.answer = _.capitalize(response.data)
+				vm.answer = "<b>Query</b>: "+ response.data.request.query+"<br>"+
+				"<b>Temperature</b>: "+ response.data.current.temperature+"<br>"+
+				"<b>Observation Time</b>: "+response.data.current.observation_time+"<br>"+"<img src=\""+response.data.current.weather_icons[0]+"\"><br>"
+			})
+			.catch(function(error) {
+				vm.answer = 'Error! Could not reach the API. ' + error
+			})
+		}
+	},
+	watch: {
+		query: function(newQuery, oldQuery) {
+			this.answer = 'Waiting for you to stop typing...'
+			this.getAnswer(newQuery)
+		},
+  		firstName: function(val) {
+			this.fullName=val + " "+this.lastName
+		},
+		lastName: function(val) {
+			this.fullName=this.firstName + " "+val
+		},
+	},
+	created: function(){
+		console.log("VueJS vm ready, Hi "+ this.name)
+		this.fullName=this.firstName+ " " + this.lastName
+	},
+	data: {
+		answer: 'Enter your city name...',
+		query: '',
+		languageName: '',
+		type: 'A',
+		firstName: 'Max',
+		lastName: 'Base',
+		fullName: '',
+		rawHtml: '<h1>html code inject from vuejs...</h1>',
+		isButtonDisabled: true,
+		name: 'Max',
+		ident: 'sampleIdent',
+		message: 'Hello Max!',
+		bold: 'It\'s a bold text',
+		website: 'https://maxbase.org',
+		seen: true,
+		notSeen: false,
+		sampleText: 'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.',
+		languages: [
+			{id: 1, name: 'PHP', color: 'red'},
+			{id: 2, name: 'C', color: 'black'},
+			{id: 3, name: 'C++', color: 'pink'},
+			{id: 4, name: 'CSS', color: 'orange'},
+			{id: 5, name: 'JS', color: 'yellow'},
+			{id: 6, name: 'RUBY', color: 'blue'},
+			{id: 7, name: 'PERL', color: 'green'},
+			{id: 8, name: 'PYTHON', color: 'pink'},
+			{id: 9, name: 'ASM', color: 'gray'},
+		],
+		items: [
+			{title: 'Max Base', text: 'a new programmer'},
+			{title: 'Stephin', text: 'a great man'},
+			{title: 'Facebook', text: 'A social network'},
+			{title: 'Telegram', text: 'A good software'},
+		],
+	}
+})
+</script>
