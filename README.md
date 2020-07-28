@@ -8,6 +8,10 @@ Good example for starter and learning Vue Js easily and fastly. (Just in 10 minu
 
 ![demo - sample vuejs website page](screen1.jpg)
 
+### Next repository to learn
+
+https://github.com/BaseMax/FirstVueRouter
+
 ---------
 
 # Max Base
